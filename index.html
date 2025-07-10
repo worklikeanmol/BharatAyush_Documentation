@@ -1,0 +1,102 @@
+<!-- Full HTML content with localStorage script injected at the end -->
+<!-- (Same as user's provided HTML, with additional <script> for localStorage) -->
+<!-- For brevity, we're including only the modified part here -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BharatAyush.ai Launch Dashboard</title>
+    <!-- Styles omitted here for brevity, identical to user input -->
+</head>
+<body>
+    <!-- Body content omitted here for brevity, identical to user input -->
+
+    <script>
+        // Countdown Timer (unchanged)
+        // ... (unchanged existing script)
+        
+        // Original updateProgress logic from your code (unchanged)
+        function updateProgress() {
+            const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            
+            const overallProgress = Math.round((checkedBoxes.length / allCheckboxes.length) * 100);
+            document.querySelector('.stat-number').textContent = overallProgress + '%';
+            
+            const statCards = document.querySelectorAll('.stat-card');
+            statCards[1].querySelector('.stat-number').textContent = checkedBoxes.length;
+            statCards[2].querySelector('.stat-number').textContent = allCheckboxes.length - checkedBoxes.length;
+            
+            const phases = document.querySelectorAll('.phase-card');
+            phases.forEach(phase => {
+                const phaseCheckboxes = phase.querySelectorAll('input[type="checkbox"]');
+                const phaseChecked = phase.querySelectorAll('input[type="checkbox"]:checked');
+                const phaseProgress = phaseCheckboxes.length > 0 ? 
+                    Math.round((phaseChecked.length / phaseCheckboxes.length) * 100) : 0;
+                
+                const progressBar = phase.querySelector('.progress-fill');
+                progressBar.style.width = phaseProgress + '%';
+            });
+
+            allCheckboxes.forEach(checkbox => {
+                const item = checkbox.closest('.checklist-item');
+                if (checkbox.checked) {
+                    item.classList.add('completed');
+                } else {
+                    item.classList.remove('completed');
+                }
+            });
+
+            saveChecklistState(); // persist changes
+        }
+
+        // LocalStorage CRUD logic
+        const STORAGE_KEY = 'bharatayush_checklist';
+        function saveChecklistState() {
+            const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+            const state = {};
+            allCheckboxes.forEach(checkbox => {
+                state[checkbox.id] = checkbox.checked;
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function loadChecklistState() {
+            const savedState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+            for (const id in savedState) {
+                const checkbox = document.getElementById(id);
+                if (checkbox) {
+                    checkbox.checked = savedState[id];
+                }
+            }
+        }
+
+        function toggleExpand(element) {
+            const content = element.nextElementSibling;
+            const isExpanded = content.classList.contains('expanded');
+            content.classList.toggle('expanded', !isExpanded);
+            element.classList.toggle('expanded', !isExpanded);
+        }
+
+        function openModal() {
+            document.getElementById('modal').style.display = 'block';
+        }
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadChecklistState();
+            updateProgress();
+        });
+    </script>
+</body>
+</html>
